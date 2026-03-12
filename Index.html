@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ClimbX Academy · O&G Sales Profiling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --black:#0A0A0A;--dark:#111111;--card:#161616;--border:#222222;
+  --yellow:#F5C500;--yellow-dim:rgba(245,197,0,0.08);
+  --white:#FFFFFF;--gray:#888888;--dim:#444444;--muted:#CCCCCC;
+  --red:#E05555;--green:#4CAF50;--blue:#4A90D9;--orange:#E07B39;
+}
+html,body{height:100%;background:var(--black);}
+body{font-family:'DM Sans',sans-serif;color:var(--white);overflow:hidden;}
+
+/* ── Layout ── */
+#app{height:100vh;display:flex;flex-direction:column;position:relative;}
+
+#progress-bar{
+  position:fixed;top:0;left:0;right:0;height:3px;
+  background:#1a1a1a;z-index:100;
+}
+#progress-fill{height:100%;background:var(--yellow);transition:width .5s cubic-bezier(.4,0,.2,1);}
+
+#topnav{
+  position:fixed;top:0;left:0;right:0;
+  padding:22px 44px;display:flex;justify-content:space-between;align-items:center;
+  z-index:50;pointer-events:none;
+}
+.logo{font-family:'DM Serif Display',serif;font-size:17px;letter-spacing:.06em;color:var(--yellow);pointer-events:auto;}
+#counter{font-size:12px;color:var(--dim);letter-spacing:.1em;font-weight:500;}
+
+#slide-area{
+  flex:1;display:flex;align-items:center;justify-content:center;
+  padding:90px 44px 60px;min-height:100vh;
+  overflow-y:auto;
+}
+
+/* ── Card ── */
+.card{
+  width:100%;max-width:680px;
+  animation:slideUp .42s cubic-bezier(.22,1,.36,1) both;
+}
+.card.exit{animation:exitUp .28s cubic-bezier(.4,0,1,1) both forwards;}
+@keyframes slideUp{from{opacity:0;transform:translateY(36px)}to{opacity:1;transform:translateY(0)}}
+@keyframes exitUp{to{opacity:0;transform:translateY(-28px)}}
+
+/* ── Intro ── */
+.intro-eyebrow{
+  font-size:11px;letter-spacing:.2em;color:var(--yellow);
+  font-weight:600;text-transform:uppercase;margin-bottom:22px;
+}
+.intro-title{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(32px,5.5vw,52px);line-height:1.1;
+  color:var(--white);margin-bottom:18px;
+}
+.intro-title em{color:var(--yellow);font-style:italic;}
+.intro-sub{font-size:15px;color:var(--gray);line-height:1.75;margin-bottom:40px;max-width:500px;}
+
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:36px;}
+.field{display:flex;flex-direction:column;gap:7px;}
+.field label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:600;}
+.field input{
+  background:var(--card);border:1.5px solid var(--border);border-radius:8px;
+  padding:13px 16px;font-size:14px;color:var(--white);
+  font-family:'DM Sans',sans-serif;outline:none;transition:border-color .2s;
+}
+.field input:focus{border-color:var(--yellow);}
+.field input::placeholder{color:#2a2a2a;}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--yellow);color:#000;border:none;
+  padding:15px 30px;border-radius:8px;
+  font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;
+  cursor:pointer;transition:all .2s;letter-spacing:.03em;
+}
+.btn:hover{background:#FFD700;transform:translateY(-1px);box-shadow:0 8px 28px rgba(245,197,0,.28);}
+.btn:active{transform:translateY(0);}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:var(--gray);
+  border:1.5px solid var(--border);padding:13px 24px;border-radius:8px;
+  font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;
+}
+.btn-ghost:hover{color:var(--white);border-color:#444;}
+
+/* ── Section card ── */
+.section-card{text-align:center;}
+.section-badge{
+  display:inline-block;
+  background:rgba(245,197,0,.09);border:1px solid rgba(245,197,0,.28);
+  color:var(--yellow);font-size:11px;font-weight:600;
+  letter-spacing:.2em;padding:5px 16px;border-radius:100px;margin-bottom:26px;
+}
+.section-title{font-family:'DM Serif Display',serif;font-size:clamp(30px,4.5vw,46px);margin-bottom:14px;}
+.section-sub{font-size:14px;color:#666;margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.65;}
+
+/* ── MCQ ── */
+.q-eyebrow{font-size:11px;letter-spacing:.15em;color:var(--yellow);font-weight:600;text-transform:uppercase;margin-bottom:11px;}
+.q-text{font-family:'DM Serif Display',serif;font-size:clamp(20px,3.2vw,30px);line-height:1.35;color:var(--white);margin-bottom:28px;}
+.options{display:flex;flex-direction:column;gap:9px;}
+.opt{
+  display:flex;align-items:flex-start;gap:13px;
+  background:var(--dark);border:1.5px solid var(--border);
+  border-radius:10px;padding:15px 18px;cursor:pointer;
+  transition:all .16s;text-align:left;
+}
+.opt:hover{border-color:#333;background:#161616;}
+.opt.selected{border-color:var(--yellow);background:var(--yellow-dim);}
+.opt.selected .opt-key{background:var(--yellow);color:#000;border-color:var(--yellow);}
+.opt.selected .opt-text{color:var(--white);}
+.opt-key{
+  flex-shrink:0;width:27px;height:27px;
+  border:1.5px solid #2e2e2e;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#444;
+  transition:all .16s;margin-top:1px;
+}
+.opt-text{font-size:14px;color:#bbb;line-height:1.5;padding-top:3px;}
+.kbd-hint{font-size:11px;color:#333;margin-top:14px;}
+.kbd-hint kbd{
+  display:inline-block;background:#161616;border:1px solid #252525;
+  border-radius:4px;padding:1px 6px;font-size:10px;color:#444;
+  font-family:'DM Sans',sans-serif;margin:0 2px;
+}
+.q-actions{display:flex;align-items:center;gap:12px;margin-top:24px;}
+.enter-hint{font-size:11px;color:#2e2e2e;}
+.enter-hint kbd{display:inline-block;background:#161616;border:1px solid #252525;border-radius:4px;padding:1px 6px;font-size:10px;color:#3a3a3a;font-family:'DM Sans',sans-serif;margin:0 2px;}
+
+/* ── Rating ── */
+.rating-intro{font-size:12px;color:#444;margin-bottom:24px;}
+.rating-intro span{color:var(--yellow);}
+.rating-rows{display:flex;flex-direction:column;}
+.rating-row{
+  display:grid;grid-template-columns:1fr auto;
+  gap:20px;align-items:center;
+  padding:16px 0;border-bottom:1px solid #181818;
+}
+.rating-row:last-child{border-bottom:none;}
+.rating-label{font-size:13px;color:#aaa;line-height:1.5;}
+.rating-num{font-size:11px;color:#2e2e2e;margin-right:6px;}
+.dots{display:flex;gap:7px;flex-shrink:0;}
+.dot{
+  width:34px;height:34px;border:1.5px solid #252525;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;color:#333;
+  cursor:pointer;transition:all .14s;
+}
+.dot:hover{border-color:var(--yellow);color:var(--yellow);}
+.dot.on{background:var(--yellow);border-color:var(--yellow);color:#000;}
+
+/* ── Open text ── */
+.open-hint{font-size:12px;color:#444;font-style:italic;margin-bottom:18px;}
+.open-ta{
+  width:100%;background:var(--dark);border:1.5px solid var(--border);
+  border-radius:10px;padding:18px;
+  font-size:14px;color:var(--white);font-family:'DM Sans',sans-serif;
+  line-height:1.7;resize:none;outline:none;min-height:130px;
+  margin-bottom:16px;transition:border-color .2s;
+}
+.open-ta:focus{border-color:var(--yellow);}
+.open-ta::placeholder{color:#222;}
+
+/* ── Result ── */
+.result-eyebrow{font-size:11px;letter-spacing:.2em;color:var(--yellow);font-weight:600;text-transform:uppercase;margin-bottom:14px;}
+.result-title{font-family:'DM Serif Display',serif;font-size:clamp(26px,4.5vw,40px);margin-bottom:6px;}
+.result-sub{font-size:14px;color:#555;margin-bottom:36px;}
+.profile-card{
+  border:1.5px solid #222;border-radius:14px;padding:32px;
+  margin-bottom:20px;background:var(--dark);
+  position:relative;overflow:hidden;
+}
+.profile-accent{position:absolute;left:0;top:0;bottom:0;width:4px;}
+.profile-inner{padding-left:12px;}
+.profile-icon{font-size:32px;margin-bottom:14px;display:block;}
+.p-code{font-size:11px;font-weight:700;letter-spacing:.15em;margin-bottom:7px;}
+.p-name{font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:5px;}
+.p-tag{font-size:13px;color:#555;margin-bottom:18px;font-style:italic;}
+.p-desc{font-size:13px;color:#888;line-height:1.75;margin-bottom:18px;}
+.p-focus-label{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#333;margin-bottom:7px;}
+.p-focus{font-size:13px;color:#ccc;background:#1a1a1a;border-radius:7px;padding:11px 14px;}
+.trainer-note{
+  background:rgba(245,197,0,.04);border:1px solid rgba(245,197,0,.12);
+  border-radius:10px;padding:18px 22px;font-size:12px;color:#666;
+  line-height:1.75;margin-bottom:28px;
+}
+.trainer-note strong{color:var(--yellow);}
+.result-btns{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* ── Bottom arrows ── */
+#bottom-nav{
+  position:fixed;bottom:28px;right:36px;
+  display:flex;gap:7px;z-index:50;
+}
+.arrow{
+  width:40px;height:40px;background:#161616;
+  border:1px solid #222;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#555;font-size:15px;transition:all .18s;
+}
+.arrow:hover:not([disabled]){background:#1e1e1e;color:var(--white);border-color:#3a3a3a;}
+.arrow[disabled]{opacity:.25;cursor:default;pointer-events:none;}
+
+@media(max-width:600px){
+  #slide-area{padding:80px 20px 50px;}
+  #topnav{padding:18px 20px;}
+  .field-grid{grid-template-columns:1fr;}
+  .rating-row{grid-template-columns:1fr;gap:10px;}
+  #bottom-nav{bottom:18px;right:18px;}
+}
+@media print{
+  #progress-bar,#topnav,#bottom-nav{display:none;}
+  #slide-area{overflow:visible;height:auto;}
+  body{overflow:auto;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="progress-bar"><div id="progress-fill" style="width:0%"></div></div>
+  <div id="topnav">
+    <div class="logo">CLIMBX</div>
+    <div id="counter"></div>
+  </div>
+  <div id="slide-area"><div id="card-wrap"></div></div>
+  <div id="bottom-nav">
+    <div class="arrow" id="btn-up" onclick="goPrev()">↑</div>
+    <div class="arrow" id="btn-dn" onclick="goNext()">↓</div>
+  </div>
+</div>
+
+<script>
+// ─── Data ─────────────────────────────────────────────────────
+const PROFILES = {
+  TE:{code:"TE",name:"The Technical Expert",tag:"Engineer-turned-BD",color:"#F5C500",icon:"⚙️",
+    desc:"You have deep product credibility that most salespeople spend years building. Your gap is translating that expertise into the language of ROI, business outcomes, and executive decisions.",
+    focus:"Value selling, ROI language, translating specs into business outcomes"},
+  RK:{code:"RK",name:"The Relationship Keeper",tag:"Long tenure, loyal accounts",color:"#4A90D9",icon:"🤝",
+    desc:"Your clients trust you deeply and your retention rates show it. Your opportunity is learning how to expand within accounts — upselling, multi-threading, and finding new logos.",
+    focus:"Upsell pathways, expansion selling, multi-stakeholder mapping"},
+  PF:{code:"PF",name:"The Process Follower",tag:"Methodical, KPI-driven",color:"#4CAF50",icon:"📋",
+    desc:"You're consistent, reliable, and your pipeline is always clean. Your growth area is developing confidence in difficult commercial conversations — especially competitive ones.",
+    focus:"Objection handling, PETRONAS battle cards, adaptive selling"},
+  EH:{code:"EH",name:"The Emerging Hunter",tag:"High potential, ambitious",color:"#E07B39",icon:"🎯",
+    desc:"You have the energy, adaptability, and commercial instinct that makes a great salesperson. Building deeper product mastery and deal gravitas will unlock your full potential.",
+    focus:"Consultative depth, product mastery, deal gravitas"}
+};
+
+const STEPS = [
+  {id:"intro",type:"intro"},
+  {id:"sA",type:"section",num:"A",title:"How You Sell",sub:"Scenario-based — choose what you actually do, not the ideal answer"},
+  {id:"q1",type:"mcq",sec:"A",n:1,
+   q:"A prospect asks: \"Why should I choose Gas Malaysia over PETRONAS?\" What do you typically do first?",
+   opts:[
+     {k:"A",t:"Walk them through product specifications and pricing structure",p:"TE"},
+     {k:"B",t:"Emphasise our track record, reliability, and service record",p:"RK"},
+     {k:"C",t:"Ask what their key priorities are, then match our strengths to those",p:"EH"},
+     {k:"D",t:"Refer them to our technical team to explain infrastructure advantages",p:"PF"}]},
+  {id:"q2",type:"mcq",sec:"A",n:2,
+   q:"You have one key contact at a large industrial account. Renewal is 9 months away. What do you do?",
+   opts:[
+     {k:"A",t:"Maintain the relationship and check in regularly — no need to push yet",p:"RK"},
+     {k:"B",t:"Start mapping other stakeholders: finance, engineering, sustainability",p:"EH"},
+     {k:"C",t:"Introduce Cogeneration or Biomethane to start an upsell conversation",p:"EH"},
+     {k:"D",t:"Ask your contact if there's anything they need before renewal",p:"PF"}]},
+  {id:"q3",type:"mcq",sec:"A",n:3,
+   q:"When introducing Biomethane to a client for the first time, you tend to:",
+   opts:[
+     {k:"A",t:"Explain how it's produced, feedstock process, and gas quality specifications",p:"TE"},
+     {k:"B",t:"Focus on ESG and Scope 2 carbon reporting benefits first",p:"EH"},
+     {k:"C",t:"Ask about their sustainability targets before presenting any product details",p:"EH"},
+     {k:"D",t:"Wait for the client to ask about green energy before raising it",p:"RK"}]},
+  {id:"q4",type:"mcq",sec:"A",n:4,
+   q:"An existing NG customer's contract is up for renewal at a rate 8% higher than last year. They push back. You:",
+   opts:[
+     {k:"A",t:"Explain the cost drivers and defend the price increase with data",p:"TE"},
+     {k:"B",t:"Offer to check internally if there's any flexibility on pricing",p:"RK"},
+     {k:"C",t:"Reframe the conversation around total cost of energy vs. price per unit",p:"EH"},
+     {k:"D",t:"Involve a manager or technical specialist to help close the conversation",p:"PF"}]},
+  {id:"q5",type:"mcq",sec:"A",n:5,
+   q:"After sending a proposal, you don't hear back for 2 weeks. You:",
+   opts:[
+     {k:"A",t:"Send a follow-up email asking if they had a chance to review it",p:"PF"},
+     {k:"B",t:"Call and ask directly — what's the hold-up and who else is involved?",p:"EH"},
+     {k:"C",t:"Send a value-add message: industry article, carbon data, or case study",p:"EH"},
+     {k:"D",t:"Give it more time — you don't want to appear pushy",p:"RK"}]},
+  {id:"sB",type:"section",num:"B",title:"Mindset & Confidence",sub:"How do you honestly feel about these commercial situations?"},
+  {id:"q6",type:"mcq",sec:"B",n:6,
+   q:"If asked to present a business case to a client's CFO — not a technical contact — how would you feel?",
+   opts:[
+     {k:"A",t:"Confident on the product, but less sure how to frame it in financial terms",p:"TE"},
+     {k:"B",t:"Comfortable — I do this regularly and know how to build ROI arguments",p:"EH"},
+     {k:"C",t:"Nervous — I'd prepare a lot and probably bring backup from my team",p:"PF"},
+     {k:"D",t:"I'd keep it technical — financials are not really my area",p:"TE"}]},
+  {id:"q7",type:"mcq",sec:"B",n:7,
+   q:"\"PETRONAS offered us the same specs at a lower price.\" Your immediate response is:",
+   opts:[
+     {k:"A",t:"Acknowledge the comparison and try to find flexibility in our offer",p:"RK"},
+     {k:"B",t:"Challenge it — are they really comparing apples to apples?",p:"EH"},
+     {k:"C",t:"Pivot to total value: reliability, service, infrastructure support",p:"EH"},
+     {k:"D",t:"Go back internally to see what we can do on price",p:"PF"}]},
+  {id:"q8",type:"mcq",sec:"B",n:8,
+   q:"A sustainability director asks how Cogeneration affects their Scope 2 emissions. You:",
+   opts:[
+     {k:"A",t:"Have a confident, numbers-ready answer including carbon reduction estimates",p:"EH"},
+     {k:"B",t:"Know the concept well but want to confirm specific figures before committing",p:"TE"},
+     {k:"C",t:"Suggest bringing in our technical team to walk through the ESG case",p:"PF"},
+     {k:"D",t:"Honestly — this comes up but I haven't fully mastered the ESG angle yet",p:"TE"}]},
+  {id:"q9",type:"mcq",sec:"B",n:9,
+   q:"Think about your last deal that stalled or went quiet. The most likely reason was:",
+   opts:[
+     {k:"A",t:"The client was happy with their current supplier — no urgency to switch",p:"RK"},
+     {k:"B",t:"I only had access to one person and didn't know who else was deciding",p:"RK"},
+     {k:"C",t:"We couldn't match the competitor's price",p:"PF"},
+     {k:"D",t:"Internal approvals on our side or the client's slowed everything down",p:"PF"}]},
+  {id:"q10",type:"mcq",sec:"B",n:10,
+   q:"How do you typically use your CRM or pipeline data?",
+   opts:[
+     {k:"A",t:"Mostly for reporting — I update it regularly but don't always act on it",p:"PF"},
+     {k:"B",t:"To prioritise my week and identify upsell opportunities",p:"EH"},
+     {k:"C",t:"I rely more on intuition and relationship knowledge than data",p:"RK"},
+     {k:"D",t:"Pipeline management is honestly not one of my strengths",p:"PF"}]},
+  {id:"sC",type:"section",num:"C",title:"Self-Assessment",sub:"Rate each statement from 1 (rarely / not confident) to 5 (always / very confident)"},
+  {id:"q11",type:"rating",sec:"C",
+   stmts:[
+    {id:"r1",t:"I can explain all 5 Gas Malaysia products clearly to any audience"},
+    {id:"r2",t:"I'm comfortable discussing energy specs, load requirements and infrastructure detail"},
+    {id:"r3",t:"I have strong, long-term relationships with my key accounts"},
+    {id:"r4",t:"My accounts rarely churn — I am good at retention and renewal"},
+    {id:"r5",t:"I follow a consistent and disciplined process for managing my pipeline"},
+    {id:"r6",t:"I can explain the ROI and payback period of Cogeneration to a CFO"},
+    {id:"r7",t:"I am comfortable initiating contact with new prospects I have no prior relationship with"},
+    {id:"r8",t:"I can handle a PETRONAS price comparison with confidence — without discounting"},
+    {id:"r9",t:"I know how to engage multiple stakeholders in a deal, not just my main contact"},
+    {id:"r10",t:"I follow up on proposals in a way that adds value, not just chases a response"}]},
+  {id:"sD",type:"section",num:"D",title:"Open Reflection",sub:"4 short written responses — be honest, not impressive"},
+  {id:"q12",type:"open",sec:"D",n:11,
+   q:"Describe how you typically open a conversation with a new prospect. What do you usually say or do first?",
+   hint:"Think about your last 2–3 new prospect conversations."},
+  {id:"q13",type:"open",sec:"D",n:12,
+   q:"When a client raises a competitor — PETRONAS, solar, or another energy option — what is your usual response?",
+   hint:"Be specific. What do you actually say, not what you think you should say."},
+  {id:"q14",type:"open",sec:"D",n:13,
+   q:"Which of Gas Malaysia's five products do you feel least confident selling, and why?",
+   hint:"NG  ·  LPG  ·  Cogeneration  ·  CNG  ·  Biomethane"},
+  {id:"q15",type:"open",sec:"D",n:14,
+   q:"What is the single biggest barrier preventing you from closing more deals or expanding existing accounts?",
+   hint:"Internal? Client-side? Market? Be honest."},
+  {id:"result",type:"result"}
+];
+
+// ─── State ─────────────────────────────────────────────────────
+let step = 0;
+let answers = {};
+let userData = {name:"",role:"",years:""};
+
+const totalMCQ = STEPS.filter(s=>s.type==="mcq").length;
+
+function answeredCount(){
+  return STEPS.filter(s=>s.type==="mcq"&&answers[s.id]).length;
+}
+
+function computeProfile(){
+  const sc={TE:0,RK:0,PF:0,EH:0};
+  STEPS.forEach(s=>{
+    if(s.type==="mcq"&&answers[s.id]){
+      const o=s.opts.find(o=>o.k===answers[s.id]);
+      if(o&&o.p) sc[o.p]++;
+    }
+  });
+  return Object.entries(sc).sort((a,b)=>b[1]-a[1])[0][0];
+}
+
+function progress(){
+  if(step===0) return 0;
+  if(step>=STEPS.length-1) return 100;
+  return Math.round((answeredCount()/totalMCQ)*90+5);
+}
+
+// ─── Navigation ────────────────────────────────────────────────
+function goNext(){
+  if(step>=STEPS.length-1) return;
+  animateOut(()=>{step++;render();});
+}
+function goPrev(){
+  if(step<=0) return;
+  animateOut(()=>{step--;render();});
+}
+function animateOut(cb){
+  const card=document.querySelector('.card');
+  if(!card){cb();return;}
+  card.classList.add('exit');
+  setTimeout(cb,260);
+}
+
+// ─── Render ────────────────────────────────────────────────────
+function render(){
+  const s=STEPS[step];
+  document.getElementById('progress-fill').style.width=progress()+'%';
+
+  const counter=document.getElementById('counter');
+  if(step===0||step===STEPS.length-1) counter.textContent='';
+  else counter.textContent=answeredCount()+' / '+totalMCQ+' answered';
+
+  const upBtn=document.getElementById('btn-up');
+  const dnBtn=document.getElementById('btn-dn');
+  upBtn.style.display=(step===0||step===STEPS.length-1)?'none':'flex';
+  dnBtn.style.display=(step===0||step===STEPS.length-1)?'none':'flex';
+  if(upBtn.style.display!=='none'){
+    upBtn.disabled=step<=1;
+    dnBtn.disabled=false;
+  }
+
+  const wrap=document.getElementById('card-wrap');
+  wrap.innerHTML='';
+  const card=document.createElement('div');
+  card.className='card';
+  card.innerHTML=buildSlide(s);
+  wrap.appendChild(card);
+  document.getElementById('slide-area').scrollTop=0;
+
+  // Focus textarea if open
+  const ta=card.querySelector('.open-ta');
+  if(ta) setTimeout(()=>ta.focus(),300);
+
+  attachEvents(s,card);
+}
+
+function buildSlide(s){
+  if(s.type==='intro') return buildIntro();
+  if(s.type==='section') return buildSection(s);
+  if(s.type==='mcq') return buildMCQ(s);
+  if(s.type==='rating') return buildRating(s);
+  if(s.type==='open') return buildOpen(s);
+  if(s.type==='result') return buildResult();
+  return '';
+}
+
+function buildIntro(){
+  return `
+    <div class="intro-eyebrow">ClimbX Academy · Pre-Training Diagnostic</div>
+    <h1 class="intro-title">Know your <em>sales profile.</em><br>Train what actually matters.</h1>
+    <p class="intro-sub">This diagnostic helps us understand how you currently sell — your strengths, your gaps, and where training will make the biggest commercial difference. No right or wrong answers. Takes about 10 minutes.</p>
+    <div class="field-grid">
+      <div class="field"><label>Your name</label><input id="fi-name" placeholder="Full name" value="${esc(userData.name)}"/></div>
+      <div class="field"><label>Role / Title</label><input id="fi-role" placeholder="e.g. Senior BD Manager" value="${esc(userData.role)}"/></div>
+      <div class="field"><label>Years in Sales / BD</label><input id="fi-years" placeholder="e.g. 7 years" value="${esc(userData.years)}"/></div>
+    </div>
+    <button class="btn" onclick="saveIntro()">Start Diagnostic &nbsp;→</button>`;
+}
+
+function buildSection(s){
+  return `
+    <div class="section-card">
+      <div class="section-badge">SECTION ${s.num}</div>
+      <h2 class="section-title">${s.title}</h2>
+      <p class="section-sub">${s.sub}</p>
+      <button class="btn" onclick="goNext()">Let's go &nbsp;→</button>
+    </div>`;
+}
+
+function buildMCQ(s){
+  const sel=answers[s.id]||'';
+  const opts=s.opts.map(o=>`
+    <div class="opt${sel===o.k?' selected':''}" onclick="selectOpt('${s.id}','${o.k}')">
+      <span class="opt-key">${o.k}</span>
+      <span class="opt-text">${o.t}</span>
+    </div>`).join('');
+  const actions=sel?`
+    <div class="q-actions">
+      <button class="btn" onclick="goNext()">OK &nbsp;✓</button>
+      <span class="enter-hint">or press <kbd>Enter ↵</kbd></span>
+    </div>`:'';
+  return `
+    <div class="q-eyebrow">Section ${s.sec} · Question ${s.n}</div>
+    <div class="q-text">${s.q}</div>
+    <div class="options">${opts}</div>
+    <div class="kbd-hint">Press <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> to select &nbsp;·&nbsp; <kbd>↵ Enter</kbd> to continue</div>
+    ${actions}`;
+}
+
+function buildRating(s){
+  const rows=s.stmts.map((st,i)=>{
+    const val=answers['r_'+st.id]||0;
+    const dots=[1,2,3,4,5].map(n=>`<div class="dot${val===n?' on':''}" onclick="setRating('${st.id}',${n})">${n}</div>`).join('');
+    return `<div class="rating-row">
+      <div class="rating-label"><span class="rating-num">${i+1}.</span>${st.t}</div>
+      <div class="dots">${dots}</div>
+    </div>`;
+  }).join('');
+  return `
+    <div class="q-eyebrow">Section ${s.sec}</div>
+    <div class="q-text" style="font-size:clamp(18px,3vw,26px);margin-bottom:8px">Rate each statement</div>
+    <div class="rating-intro"><span>1</span> = Rarely / Not confident &nbsp;·&nbsp; <span>5</span> = Always / Very confident</div>
+    <div class="rating-rows">${rows}</div>
+    <div class="q-actions" style="margin-top:28px">
+      <button class="btn" onclick="goNext()">Continue &nbsp;→</button>
+    </div>`;
+}
+
+function buildOpen(s){
+  const val=answers[s.id]||'';
+  const isLast=step===STEPS.length-2;
+  const skipBtn=!val.trim()?`<button class="btn-ghost" onclick="goNext()">Skip</button>`:'';
+  return `
+    <div class="q-eyebrow">Section ${s.sec} · Question ${s.n}</div>
+    <div class="q-text">${s.q}</div>
+    ${s.hint?`<div class="open-hint">${s.hint}</div>`:''}
+    <textarea class="open-ta" placeholder="Write your response here..." rows="5" id="ota-${s.id}">${esc(val)}</textarea>
+    <div class="q-actions">
+      <button class="btn" onclick="saveOpen('${s.id}')">${isLast?'See my profile &nbsp;→':'Continue &nbsp;→'}</button>
+      ${skipBtn}
+    </div>`;
+}
+
+const SHEET_URL="https://script.google.com/macros/s/AKfycbyJCwufPQlJJxe0H0viEPDPp8sxf8WnJD5tXaWTwJGmPqrKM_IzexU5l8BjTrbFJWy4Cg/exec";
+let submitted=false;
+
+function submitToSheet(pk){
+  if(submitted)return;
+  submitted=true;
+  const payload={
+    name:userData.name,role:userData.role,years:userData.years,profile:pk,
+    q1:answers.q1||'',q2:answers.q2||'',q3:answers.q3||'',q4:answers.q4||'',q5:answers.q5||'',
+    q6:answers.q6||'',q7:answers.q7||'',q8:answers.q8||'',q9:answers.q9||'',q10:answers.q10||'',
+    r_r1:answers.r_r1||'',r_r2:answers.r_r2||'',r_r3:answers.r_r3||'',r_r4:answers.r_r4||'',r_r5:answers.r_r5||'',
+    r_r6:answers.r_r6||'',r_r7:answers.r_r7||'',r_r8:answers.r_r8||'',r_r9:answers.r_r9||'',r_r10:answers.r_r10||'',
+    q12:answers.q12||'',q13:answers.q13||'',q14:answers.q14||'',q15:answers.q15||''
+  };
+  fetch(SHEET_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).catch(()=>{});
+}
+
+function buildResult(){
+  const pk=computeProfile();
+  const p=PROFILES[pk];
+  const nm=userData.name?userData.name.split(' ')[0]+', ':'';
+  setTimeout(()=>submitToSheet(pk),300);
+  return `
+    <div class="result-eyebrow">Diagnostic Complete</div>
+    <h2 class="result-title">${nm}your profile is</h2>
+    <p class="result-sub">Based on your responses across all four sections</p>
+    <div class="profile-card">
+      <div class="profile-accent" style="background:${p.color}"></div>
+      <div class="profile-inner">
+        <span class="profile-icon">${p.icon}</span>
+        <div class="p-code" style="color:${p.color}">${p.code}</div>
+        <div class="p-name">${p.name}</div>
+        <div class="p-tag">${p.tag}</div>
+        <p class="p-desc">${p.desc}</p>
+        <div class="p-focus-label">Training focus</div>
+        <div class="p-focus">${p.focus}</div>
+      </div>
+    </div>
+    <div class="result-btns">
+      <button class="btn" onclick="retake()">Retake Diagnostic</button>
+      <button class="btn-ghost" onclick="window.print()">Print / Save</button>
+    </div>`;
+}
+
+// ─── Helpers ───────────────────────────────────────────────────
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function saveIntro(){
+  userData.name=document.getElementById('fi-name').value;
+  userData.role=document.getElementById('fi-role').value;
+  userData.years=document.getElementById('fi-years').value;
+  goNext();
+}
+
+function selectOpt(qid,key){
+  answers[qid]=key;
+  render();
+  setTimeout(()=>goNext(),380);
+}
+
+function setRating(sid,val){
+  answers['r_'+sid]=val;
+  render();
+}
+
+function saveOpen(qid){
+  const ta=document.getElementById('ota-'+qid);
+  if(ta) answers[qid]=ta.value;
+  goNext();
+}
+
+function retake(){
+  step=0;answers={};userData={name:'',role:'',years:''};render();
+}
+
+function attachEvents(s,card){
+  // Sync open textarea on input
+  if(s.type==='open'){
+    const ta=card.querySelector('.open-ta');
+    if(ta) ta.addEventListener('input',()=>{answers[s.id]=ta.value;});
+  }
+  // Sync intro fields on input
+  if(s.type==='intro'){
+    ['fi-name','fi-role','fi-years'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.addEventListener('input',()=>{
+        userData.name=document.getElementById('fi-name').value;
+        userData.role=document.getElementById('fi-role').value;
+        userData.years=document.getElementById('fi-years').value;
+      });
+    });
+    ['fi-name','fi-role','fi-years'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.addEventListener('keydown',e=>{if(e.key==='Enter'){saveIntro();}});
+    });
+  }
+}
+
+// ─── Keyboard ─────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  const s=STEPS[step];
+  if(!s) return;
+  // MCQ letter keys
+  if(s.type==='mcq'){
+    const map={a:'A',b:'B',c:'C',d:'D'};
+    const k=map[e.key.toLowerCase()];
+    if(k){answers[s.id]=k;render();setTimeout(()=>goNext(),380);return;}
+  }
+  // Enter to advance
+  if(e.key==='Enter'&&!e.shiftKey){
+    const active=document.activeElement;
+    // Don't intercept enter in textarea
+    if(active&&active.tagName==='TEXTAREA') return;
+    if(s.type==='section') goNext();
+    if(s.type==='mcq'&&answers[s.id]) goNext();
+  }
+});
+
+// ─── Init ─────────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
